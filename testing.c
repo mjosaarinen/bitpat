@@ -142,27 +142,21 @@ int gen_90b_dat()
 	return 0;
 }
 
-int kek()
+//	used to generate min-entropy estimates for random parameters
+
+int kek(double f, double d, double s2, size_t n)
 {
 	int bit;
-	size_t i, j;
-	size_t m, n;
+	size_t i, j, m;
 	double *vx, *vy;
 	double *g0, *g1;
 	fftw_complex *vt, *vu;
 	fftw_plan px, py, pz;
 
 	double h, p0, p1;
-	double r, t, d, f, s2;
+	double r, t;
 
-	double x;
-
-	f = 0.3;
-	d = 0.615;
-	s2 = 0.045;
-
-	m = 8192;
-	n = 32;
+	m = 1 << 14;
 
 	//	used to store store the distribution
 	g0 = (double *)fftw_malloc(sizeof(double) * m);
@@ -188,14 +182,11 @@ int kek()
 		vx[i] = 1.0;
 	}
 
-	//	iterate over bits
-
 	//	x = d >= 0.5 ? d / 2.0 : d + 0.5 * (1.0-d);
+	//	double x = xcrand_d();
+	//	printf("x=%.14f\n", x);
 
-	x = drand48();
-	vec_fs(vx, m, x, s2);
-
-	printf("x=%.14f\n", x);
+	//	iterate over bits
 
 	h = 0.0;
 	for (j = 0; j < n; j++) {
@@ -205,9 +196,11 @@ int kek()
 		p1 = vec_chop(g1, vx, m, d, 1);
 		bit = p0 > p1 ? 0 : 1;
 
+/*
 		bit = x < d ? 1 : 0;
 		x += f;
 		x -= floor(x);
+*/
 
 		if (bit == 0) {
 			h -= log2(p0 / (p0 + p1));

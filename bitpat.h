@@ -17,27 +17,33 @@
 #define TAILCUT_TAU 15.0
 #endif
 
-//	===	Compute min-entropy -log2(max p_z)
+//	===	Evaluate min-entropy -log2(max p_z) using FFT (pzfft)
 //	f	fequency [0,1] (peak)
 //	d	cutoff (0.5 = no bias)
 //	s2	jitter variance
 //	n	Zn -- the bit sample size
 //	m	FFT size (must be power of 2)
+//	v	verbose (0 = print nothing, 1 = distribution to stdout)
 
-double jitter_fft(double f, double d, double s2, size_t n, size_t m);
+double entropy_fft(double f, double d, double s2, size_t n, size_t m, int v);
 
-//	===	Simulate min-entropy -log2(max p_z)
+//	===	Estimate min-entropy -log2(max p_z) using simulation
 //	f	fequency [0,1] (peak)
 //	d	cutoff  [0,1] (0.5 = no bias)
 //	s2	jitter variance
 //	n	Zn -- the bit sample size
 //	m	number of iterations
+//	v	verbose (0 = print nothing, 1 = distribution to stdout)
 
-double jitter_sim(double f, double d, double s2, size_t n, size_t m);
+double entropy_sim(double f, double d, double s2, size_t n, size_t m, int v);
+
+
+//	===	auxiliary functions
 
 //	===	Simulate byte strings into *zv. "zvlen" is length in bytes.
 
 void zbytes(uint8_t *zv, size_t zvlen, double f, double d, double s2);
+
 
 //	===	f_s	step function.
 //	vs	result, scaled as vs[i] = f_s(i/m)

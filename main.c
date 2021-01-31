@@ -14,19 +14,21 @@ int main(int argc, char **argv)
 	(void)argc;
 	(void)argv;
 
-	double h, f, d, s2;
-	size_t n;
+	double f, d, s;
 
-	f = 0.1;
-	d = 0.625;
-	s2 = 0.04;
-	n = 5;
+	//	print FFT and simulated values
+	f = 0.15;
+	s = 0.2;
+	d = 0.5;
+	
+	entropy_fft(f, d, s*s, 3, 1 << 10, 1);
+	entropy_sim(f, d, s*s, 3, 10000000, 1);
 
-	h = jitter_fft(f, d, s2, n, 1 << 10);
-	printf("jitter_fft()  H = %f\n", h);
+	entropy_fft(f, d, s*s, 4, 1 << 10, 1);
+	entropy_sim(f, d, s*s, 4, 10000000, 1);
 
-	h = jitter_sim(f, d, s2, n, 1000000);
-	printf("jitter_sim()  H = %f\n", h);
+	entropy_fft(f, d, s*s, 5, 1 << 10, 1);
+	entropy_sim(f, d, s*s, 5, 10000000, 1);
 
 	return 0;
 }
