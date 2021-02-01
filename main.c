@@ -17,9 +17,9 @@ int main(int argc, char **argv)
 	double f, d, s;
 
 	//	print FFT and simulated values
-	f = 0.15;
-	s = 0.3;
 	d = 0.5;
+	f = 0.15;
+	s = 0.2;
 	
 	entropy_fft(f, d, s*s, 3, 1 << 10, 1);
 	entropy_sim(f, d, s*s, 3, 10000000, 1);

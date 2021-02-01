@@ -46,7 +46,7 @@ void zbytes(uint8_t *zv, size_t zvlen, double f, double d, double s2)
 
 //	===	Estimate min-entropy -log2(max p_z) using simulation
 //	f	fequency [0,1] (peak)
-//	d	cutoff  [0,1] (0.5 = no bias)
+//	d	cutoff (0.5 = no bias)
 //	s2	jitter variance
 //	n	Zn -- the bit sample size
 //	m	number of iterations
