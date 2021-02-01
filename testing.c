@@ -142,91 +142,114 @@ int gen_90b_dat()
 	return 0;
 }
 
-//	used to generate min-entropy estimates for random parameters
+//	===	Estimate min-entropy -log2(max p_z) by depth-first search on z
+//	f	fequency [0,1] (peak)
+//	d	cutoff (0.5 = no bias)
+//	s2	jitter variance
+//	n	Zn -- the bit sample size
+//	m	FFT size (must be power of 2)
+//	dfs	strategy
+//	v	verbose (0 = print nothing, 1 = distribution to stdout)
 
-int kek(double f, double d, double s2, size_t n)
+double entropy_dfs(double f, double d, double s2, size_t n, size_t m, 
+	int v, dfs_how_t how)
 {
 	int bit;
-	size_t i, j, m;
+	size_t i, j;
 	double *vx, *vy;
 	double *g0, *g1;
 	fftw_complex *vt, *vu;
 	fftw_plan px, py, pz;
 
-	double h, p0, p1;
-	double r, t;
+	double h, q0, q1;
+	double x, r, t;
 
-	m = 1 << 14;
-
-	//	used to store store the distribution
+	//	distributions  vt = fft(vx)
 	g0 = (double *)fftw_malloc(sizeof(double) * m);
 	g1 = (double *)fftw_malloc(sizeof(double) * m);
 	vx = (double *)fftw_malloc(sizeof(double) * m);
 	vt = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * m);
 	px = fftw_plan_dft_r2c_1d(m, vx, vt, FFTW_ESTIMATE);
 
-	//	used to store fs
+	//	step function  vu = fft(vy)
 	vy = (double *)fftw_malloc(sizeof(double) * m);
 	vu = (fftw_complex *)fftw_malloc(sizeof(fftw_complex) * m);
 	py = fftw_plan_dft_r2c_1d(m, vy, vu, FFTW_ESTIMATE);
 
-	//	convolution result
+	//	convolution result  vx = fft^-1(vx)
 	pz = fftw_plan_dft_c2r_1d(m, vt, vx, FFTW_ESTIMATE);
 
-	//	compute and transform the step function
+	//	compute transformed  step function
 	r = vec_fs(vy, m, f, s2);
 	fftw_execute(py);
 
-	//	uniform
+	//	uniform start
 	for (i = 0; i < m; i++) {
 		vx[i] = 1.0;
 	}
 
-	//	x = d >= 0.5 ? d / 2.0 : d + 0.5 * (1.0-d);
-	//	double x = xcrand_d();
-	//	printf("x=%.14f\n", x);
+	//	for deterministic step, xenter of the larger bias
+	x = d >= 0.5 ? d / 2.0 : d + 0.5 * (1.0 - d);
 
 	//	iterate over bits
 
 	h = 0.0;
 	for (j = 0; j < n; j++) {
+	
+
+		//	convolution with the step function
+
+		if (j > 0) {		
+			fftw_execute(px);
+			for (i = 0; i < m; i++) {
+				t = vt[i][0] * vu[i][0] - vt[i][1] * vu[i][1];
+				vt[i][1] = vt[i][0] * vu[i][1] + vt[i][1] * vu[i][0];
+				vt[i][0] = t;
+			}
+			fftw_execute(pz);
+		}
+		
 		//	select bit, normalize
 
-		p0 = vec_chop(g0, vx, m, d, 0);
-		p1 = vec_chop(g1, vx, m, d, 1);
-		bit = p0 > p1 ? 0 : 1;
+		q0 = vec_chop(g0, vx, m, d, 0);
+		q1 = vec_chop(g1, vx, m, d, 1);
 
-/*
-		bit = x < d ? 1 : 0;
+		//	track a point
 		x += f;
 		x -= floor(x);
-*/
 
+		//	strategy
+		switch (how) {		
+				
+			case DFS_BIG_MASS:
+				bit = q0 > q1 ? 0 : 1;
+				break;
+
+			default:
+			case DFS_FOLLOW_X:
+				bit = x < d ? 1 : 0;
+				break;
+		}
+
+		//	bit selection
 		if (bit == 0) {
-			h -= log2(p0 / (p0 + p1));
-			r = 1.0 / p0;
+			h -= log2(q0 / (q0 + q1));
+			r = 1.0 / q0;
 			for (i = 0; i < m; i++) {
 				vx[i] = r * g0[i];
 			}
 		} else {
-			h -= log2(p1 / (p0 + p1));
-			r = 1.0 / p1;
+			h -= log2(q1 / (q0 + q1));
+			r = 1.0 / q1;
 			for (i = 0; i < m; i++) {
 				vx[i] = r * g1[i];
 			}
 		}
-		t = (p0 + p1);
-		printf("[%3zu] %d  p0=%16.14f  p1=%16.14f  h=%16.8f\n", j, bit, p0 / t,
-			   p1 / t, h / ((double)j + 1));
-
-		//	perform convolution with the step function
-		fftw_execute(px);
-		for (i = 0; i < m; i++) {
-			t = vt[i][0] * vu[i][0] - vt[i][1] * vu[i][1];
-			vt[i][1] = vt[i][0] * vu[i][1] + vt[i][1] * vu[i][0];
-			vt[i][0] = t;
+		t = (q0 + q1);
+		if (v) {
+			printf("[%3zu] %d  q0= %16.14f  q1= %16.14f  h= %16.8f\n",
+				j, bit, q0 / t, q1 / t, h / ((double)j + 1));
 		}
-		fftw_execute(pz);
 	}
 
 	fftw_destroy_plan(px);
@@ -240,5 +263,37 @@ int kek(double f, double d, double s2, size_t n)
 	fftw_free(vy);
 	fftw_free(vu);
 
-	return 0;
+	return h / ((double) n);
 }
+
+//	create data for scatterplot
+
+void gen_estim()
+{
+	double f, d, s;
+	xcrand_t xcr;
+	size_t i, n, m;
+	
+	double h_mass, h_usex;
+	
+	xcrand_init(&xcr);
+
+	n = 100;
+	m = 1 << 10;
+
+	for (i = 0; i < 10000; i++) {
+
+		f = xcrand_d(&xcr);
+		d = 0.5;
+		s = 0.5 * xcrand_d(&xcr);
+
+		h_mass = entropy_dfs(f, d, s*s, n, m, 0, DFS_BIG_MASS);
+		h_usex = entropy_dfs(f, d, s*s, n, m, 0, DFS_FOLLOW_X);
+		
+		printf("s= %10.8f f= %10.7f  h_mass= %10.8f  h_usex= %10.8f  %s\n",
+			s, f, h_mass, h_usex,
+			h_mass < h_usex ? "mass" : "usex");
+	}
+}
+
+

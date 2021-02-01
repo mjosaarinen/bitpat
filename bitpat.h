@@ -38,6 +38,27 @@ double entropy_fft(double f, double d, double s2, size_t n, size_t m, int v);
 double entropy_sim(double f, double d, double s2, size_t n, size_t m, int v);
 
 
+//	===	Estimate min-entropy -log2(max p_z) by depth-first search on z
+//	f	fequency [0,1] (peak)
+//	d	cutoff (0.5 = no bias)
+//	s2	jitter variance
+//	n	Zn -- the bit sample size
+//	m	FFT size (must be power of 2)
+//	how	strategy
+//	v	verbose (0 = print nothing, 1 = distribution to stdout)
+
+
+//	strategy
+enum dfs_how {
+	DFS_BIG_MASS = 0,
+	DFS_FOLLOW_X,	
+};
+
+typedef enum dfs_how dfs_how_t;
+
+double entropy_dfs(double f, double d, double s2, size_t n, size_t m, 
+	int v, dfs_how_t how);
+
 //	===	auxiliary functions
 
 //	===	Simulate byte strings into *zv. "zvlen" is length in bytes.
