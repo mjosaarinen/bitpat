@@ -11,7 +11,7 @@ Currently there's just a stub `main()` that prints both
 calculated (`entropy_fft`) and simulated (`entropy_sim`)
 probability distributions for some parameters.
 
-Plain C code, requires FFTW3
+Plain C code, requires [FFTW3](http://www.fftw.org):
 ```
 sudo apt install libfftw3-dev
 ```
