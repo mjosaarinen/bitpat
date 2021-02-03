@@ -40,7 +40,7 @@ int main(int argc, char **argv)
 	
 	//	print FFT and simulated distributions, entropy estimates
 
-	for (i = 3; i <= 3; i++) {
+	for (i = 3; i <= 3; i++) {		//	swithch to 3..5 for example in paper
 		h_fft = entropy_fft(f, d, s2, i, m_fft, 1);
 		h_sim = entropy_sim(f, d, s2, i, m_sim, 1);
 		printf("Z%d  H_fft= %10.8f  H_sim= %10.8f\n\n", i, h_fft, h_sim);
