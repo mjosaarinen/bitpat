@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 	
 	f = 0.15;			//	fractional frequency
 	d = 0.5;			//	bias towards 1 (0.5 = no bias)
-	s2 = 0.02;			//	jitter variance
+	s2 = 0.04;			//	jitter variance
 	
 	m_fft = 1 << 12;	//	fft vector size (power of 2)
 	m_sim = 10000000;	//	iteration count for simulations

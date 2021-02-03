@@ -5,8 +5,8 @@
 export
 
 CC 		=	gcc
-CFLAGS	=	-Wall -Wextra -Wshadow -Ofast -march=native
-#-fsanitize=address,undefined -O2
+CFLAGS	=	-Wall -Wextra -O3
+#-fsanitize=address,undefined -O2 -g
 LDLIBS	=	-lfftw3 -lm
 
 XBIN	=	xtest

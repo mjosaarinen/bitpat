@@ -16,20 +16,23 @@
 
 double eval_s1(double f, double d, double s2, double x)
 {
-	double xi, ai, bi;
-
+	double ai, bi;
 	double u = sqrt(2.0 * s2);
 	double t = 1.0 / u;			//	scale factor
 	double tc = ceil(TAILCUT_TAU * sqrt(s2));
 	double erfs = 0.0;
 	double exps = 0.0;
+	int i, l;
 	
 	//	run sum x-f - tc ... x-f + tc
-	for (xi = x - f - tc; xi <= x - f + tc; xi += 1.0) {
-		ai = t * xi;
-		bi = t * (xi - d);
+	ai = t * (x - f - tc);
+	bi = t * (x - f - d - tc);
+	l = 2 * tc;
+	for (i = 0; i < l; i++) {
 		erfs += ai * erf(ai) - bi * erf(bi);
 		exps += exp(-ai*ai) - exp(-bi*bi);
+		ai += t;
+		bi += t;
 	}
 	
 	//	1/sqrt(Pi)

@@ -11,10 +11,10 @@
 #include <stddef.h>
 
 //	Gaussian tailcut, in standard deviation "sigmas".
-//	From CDF, epsilon ~= erfc( tau / sqrt(2) ); 15 is good for IEEE Float.
+//	From CDF, epsilon ~= erfc( tau / sqrt(2) ); 10 is okay for IEEE Float.
 
 #ifndef TAILCUT_TAU
-#define TAILCUT_TAU 15.0
+#define TAILCUT_TAU 10.0
 #endif
 
 //	===	Evaluate min-entropy -log2(max p_z) using FFT (pzfft.c)
