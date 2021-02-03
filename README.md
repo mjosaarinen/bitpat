@@ -7,11 +7,12 @@ Supplementary material to the paper
 
 See [bitpat.h](bitpat.h) for function definitions.
 
-Currently there's just a stub `main()` that prints both 
-calculated (`entropy_fft`) and simulated (`entropy_sim`)
-probability distributions for some parameters.
+Currently there's just a stub `main()` that prints 
+calculated and simulated autocorrelated vectors for
+some parameters, and then the same for bit pattern
+distributions and entropy.
 
-Plain C code, requires [FFTW3](http://www.fftw.org):
+The code is plain C99, requires just [FFTW3](http://www.fftw.org):
 ```
 sudo apt install libfftw3-dev
 ```

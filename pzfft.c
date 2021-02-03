@@ -1,4 +1,4 @@
-//	bitpat.c
+//	pzfft.c
 //	2021-01-31	Markku-Juhani O. Saarinen <mjos@pqshield.com>
 //	Copyright (c) 2021, PQShield Ltd.  All rights reserved.
 

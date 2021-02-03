@@ -1,4 +1,4 @@
-//	jitter.c
+//	simul.c
 //	2021-01-24	Markku-Juhani O. Saarinen <mjos@pqshield.com>
 //	Copyright (c) 2021, PQShield Ltd.  All rights reserved.
 
@@ -7,6 +7,8 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <assert.h>
 
 #include "xcrand.h"
 #include "bitpat.h"
@@ -21,7 +23,7 @@
 		if (x < d) z ^= 1;             \
 	}
 
-//	===	Simulate byte strings into *zv. "zvlen" is length in bytes.
+//	=== Simulate byte strings into *zv. "zvlen" is length in bytes.
 
 void zbytes(uint8_t *zv, size_t zvlen, double f, double d, double s2)
 {
@@ -44,7 +46,52 @@ void zbytes(uint8_t *zv, size_t zvlen, double f, double d, double s2)
 	}
 }
 
-//	===	Estimate min-entropy -log2(max p_z) using simulation
+//	===	Estimate autocorrelation vector Ck[] from simulation.
+//	*ck	result vector, each entry scaled to -1 <= ck[k] <= 1
+//	(f, d, s2)	parameters
+//	l	length of ck[] (at most 64)
+//	m	number of simulation iterations (at least l)
+
+void ck_sim(double *ck, double f, double d, double s2, size_t l, size_t m)
+{
+	size_t i, j, k;;
+	double x, s;
+	uint64_t z, sum[64];
+	xcrand_t xcr;
+
+	assert(l <= 64);
+	assert(m > l);
+	xcrand_init(&xcr);
+
+	s = sqrt(s2);
+	x = xcrand_d(&xcr);
+	
+	//	initialize
+	z = 0;
+	memset(sum, 0, sizeof(uint64_t) * l);
+
+	//	m steps
+	for (i = 0; i < m; i++) {
+
+		JITTER_STEP
+
+		//	ck[0] is simple bias
+		sum[0] += z & 1;
+		
+		//	autocorrelation counts
+		j = i < l ? i : l;
+		for (k = 1; k < j; k++) {
+			//	0 = different  1 = same  (xnor!)
+			sum[k] += ~(z ^ (z >> k)) & 1;
+		}
+	}
+	
+	for (k = 0; k < l; k++) {
+		ck[k] = 2.0 * (((double) sum[k]) / ((double) (m - k))) - 1.0;
+	}
+}
+
+//	===	Estimate min-entropy -log2(max p_z) using simulation.
 //	f	fequency [0,1] (peak)
 //	d	cutoff (0.5 = no bias)
 //	s2	jitter variance

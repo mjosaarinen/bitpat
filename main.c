@@ -14,21 +14,37 @@ int main(int argc, char **argv)
 	(void)argc;
 	(void)argv;
 
-	double f, d, s;
-
-	//	print FFT and simulated values
-	d = 0.5;
-	f = 0.15;
-	s = 0.2;
+	double f, d, s2;
+	double ck[20];
+	int i;
+	size_t m_fft, m_sim;
+	double h_fft, h_sim;
 	
-	entropy_fft(f, d, s*s, 3, 1 << 10, 1);
-	entropy_sim(f, d, s*s, 3, 10000000, 1);
+	f = 0.15;			//	fractional frequency
+	d = 0.5;			//	bias towards 1 (0.5 = no bias)
+	s2 = 0.02;			//	jitter variance
+	
+	m_fft = 1 << 12;	//	fft vector size (power of 2)
+	m_sim = 10000000;	//	iteration count for simulations
+	
+	//	autocorrelation vectors
+	
+	printf("ck_sim() m= %zu\n", m_sim);
+	ck_sim(ck, f, d, s2, 10, m_sim);
 
-	entropy_fft(f, d, s*s, 4, 1 << 10, 1);
-	entropy_sim(f, d, s*s, 4, 10000000, 1);
+	for (i = 0; i < 10; i++) {
+		printf("C_%d  %+18.15f  ( sim: %+9.6f )\n",
+			i, ck_eval(f, d, s2, i), ck[i]);
+	}
+	printf("\n");
+	
+	//	print FFT and simulated distributions, entropy estimates
 
-	entropy_fft(f, d, s*s, 5, 1 << 10, 1);
-	entropy_sim(f, d, s*s, 5, 10000000, 1);
-
+	for (i = 3; i <= 3; i++) {
+		h_fft = entropy_fft(f, d, s2, i, m_fft, 1);
+		h_sim = entropy_sim(f, d, s2, i, m_sim, 1);
+		printf("Z%d  H_fft= %10.8f  H_sim= %10.8f\n\n", i, h_fft, h_sim);
+	}
+	
 	return 0;
 }
