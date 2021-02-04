@@ -20,8 +20,8 @@ in (F, D, s2) ring oscillator model parameters. Some main functions:
 	of Eqn. 6, for which `eval_s1()` computes the indefinite integral of
 	Eqn. 12.
 *	[simul.c](simul.c) has functions `entropy_sim()` and `ck_sim()` which
-	obtain numbers for the same purpose via (much slower) Monte Carlo
-	simulation.
+	obtain distribution, entropy, and autocorrelation estimates via 
+	(much slower) Monte Carlo simulation.
 
 There's a stub [main.c](main.c) that prints calculated and simulated
 autocorrelated vectors for some parameters, and then does the same for bit
