@@ -49,10 +49,13 @@ double ck_eval(double f, double d, double s2, int k)
 {
 	if (k == 0)
 		return 2.0 * d - 1.0;
-
+		
 	//	scale f and s2 as per theorem 1
-	f = fmod( f * k, 1.0 );
+	f *= (double) k;
 	s2 *= (double) k;
+	f -= floor(f);
+	if (f > 0.5)
+		f = 1.0 - f;
 
 	return 4.0 * ( eval_s1(f, d, s2, d) - eval_s1(f, d, s2, 0.0) - d ) + 1.0;
 }
