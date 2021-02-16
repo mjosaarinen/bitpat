@@ -27,7 +27,7 @@ double eval_s1(double f, double d, double s2, double x)
 	//	run sum x-f - tc ... x-f + tc
 	ai = t * (x - f - tc);
 	bi = t * (x - f - d - tc);
-	l = 2 * tc;
+	l = 2 * tc + 1;						//	include +-tc (and zero)
 	for (i = 0; i < l; i++) {
 		erfs += ai * erf(ai) - bi * erf(bi);
 		exps += exp(-ai*ai) - exp(-bi*bi);
